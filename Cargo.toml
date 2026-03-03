@@ -2,6 +2,12 @@
 name = "hello-rust"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+repository = "https://github.com/Didier-Lane/hello-rust"
+homepage = "https://github.com/Didier-Lane/hello-rust"
+documentation = "https://docs.rs/hello-rust"
+keywords = ["web", "axum", "http"]
+categories = ["web-programming", "asynchronous"]
 
 [dependencies]
 axum = "0.8"
@@ -13,7 +19,7 @@ tower-http = { version = "0.6", features = ["trace", "cors"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 anyhow = "1"
-clap = { version = "4", features = ["derive"] }
+clap = { version = "4", features = ["derive", "env"] }
 ferris-says = "0.3"
 
 [profile.release]

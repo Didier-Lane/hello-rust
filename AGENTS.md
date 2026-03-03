@@ -80,6 +80,36 @@ Based on [ANSSI Secure Rust Guidelines](https://anssi-fr.github.io/rust-guide/).
 - Run `cargo outdated` to check for outdated dependencies
 - Pin dependency versions when possible
 
+## Rust API Guidelines
+
+Based on [Rust API Guidelines Checklist](https://rust-lang.github.io/api-guidelines/checklist.html).
+
+### Documentation (C-CRATE-DOC, C-EXAMPLE, C-FAILURE)
+- All crates must have comprehensive documentation with examples
+- All public functions must have rustdoc examples showing usage
+- Function docs must include `# Errors`, `# Panics`, and `# Safety` sections when applicable
+- Use `?` operator instead of `try!` or `unwrap` in examples
+
+### Interoperability (C-COMMON-TRAITS, C-GOOD-ERR)
+- Implement common traits: `Debug`, `Clone`, `PartialEq`, `Eq`, `Display`, `Error`
+- Error types must implement `source()` for error chaining
+- Error types should be `Send` and `Sync` where possible
+- Use `thiserror` or `anyhow` for error handling
+
+### Validation (C-VALIDATE)
+- Validate all user input
+- Set size limits on request bodies (e.g., 64KB for JSON)
+- Use explicit error types with meaningful messages
+
+### Cargo.toml Metadata (C-METADATA)
+Required fields in `[package]`:
+- `license` - e.g., "MIT"
+- `repository` - URL to source repository
+- `homepage` - URL to project homepage
+- `documentation` - URL to docs.rs
+- `keywords` - array of relevant keywords
+- `categories` - array of crate categories
+
 ## Git Conventions
 - Use conventional commit messages: `feat:`, `fix:`, `docs:`, `refactor:`, `test:`
 - Run `cargo fmt` and `cargo clippy` before committing
