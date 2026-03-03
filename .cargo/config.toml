@@ -1,0 +1,2 @@
+[lint.clippy]
+mem_forget = "forbid"
