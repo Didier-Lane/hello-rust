@@ -1,139 +1,87 @@
 # AGENTS.md - Guidelines for Agentic Coding in this Repository
 
-This is a Rust project using Cargo. The following guidelines should be followed when making code changes.
-
-## Project Overview
-
-- **Project name**: hello-rust
-- **Type**: Simple Rust CLI application
-- **Edition**: 2021 (note: Cargo.toml incorrectly states "2024")
-- **Dependencies**: ferris-says 0.3.2
-
-## Build / Lint / Test Commands
-
-### Build
-```bash
-cargo build        # Build debug mode
-cargo build --release  # Build release mode
-cargo run          # Build and run
-```
-
-### Linting
-```bash
-cargo fmt          # Format code (run before committing)
-cargo fmt --check # Check formatting without modifying
-cargo clippy       # Run lints and warnings
-cargo clippy -- -D warnings  # Treat warnings as errors
-```
-
-### Testing
-```bash
-cargo test              # Run all tests
-cargo test <test_name>   # Run a single test (partial name match)
-cargo test -- --nocapture    # Show print output during tests
-```
-
-### Additional
-```bash
-cargo check     # Type-check without building
-cargo doc        # Build documentation
-cargo doc --open # Build and open documentation
-```
+This is a Rust project using Cargo with an Axum HTTP server.
 
 ## Code Style Guidelines
 
 ### Imports
 - Use standard library imports first, then external crates
 - Group imports by crate: std → external → crate
-- Use absolute paths for external crates: `use ferris_says::say;`
+- Use absolute paths for external crates: `use axum::{Router, routing::get};`
 - Prefer importing specific items: `use std::io::{BufWriter, Write};`
 
 ```rust
 // Good
 use std::io::{BufWriter, stdout, Write};
-use ferris_says::say;
+use axum::{Router, routing::get};
 
 // Avoid
 use std::io::*;
-use ferris_says::*;
+use axum::*;
 ```
 
 ### Formatting
-- Follow `rustfmt` default settings (4 spaces, 100 char max line length)
+- Follow `rustfmt` settings in `rustfmt.toml` (4 spaces, 100 char max)
 - Always run `cargo fmt` before committing
-- Use trailing commas in multi-line collections
 
 ### Types
 - Prefer explicit type annotations for function signatures
-- Use idiomatic Rust types: `&str` over `String` for references, `&[T]` over `Vec<T>` for slices
-- Use `Result<T, E>` for error handling; avoid `Option` unless truly optional
-
-### Naming Conventions
-- **Variables/functions**: snake_case (`my_variable`, `calculate_value`)
-- **Types/Enums**: PascalCase (`MyStruct`, `ErrorKind`)
-- **Constants**: SCREAMING_SNAKE_CASE
-- **Traits**: Noun form (`Clone`, `Display`, `Iterator`)
-- **Booleans**: Prefix with `is_`, `has_`, `should_`, etc.
+- Use idiomatic Rust types: `&str` over `String` for references
+- Use `Result<T, E>` for error handling
 
 ### Error Handling
-- Use `Result<T, E>` for fallible operations
-- Prefer `?` operator over `match` for simple error propagation
-- Use `anyhow` or `thiserror` for application-level errors (add as dependencies if needed)
-- Avoid `unwrap()` in production code; use `expect()` with descriptive messages if absolutely necessary
-
-```rust
-// Good
-fn read_file(path: &Path) -> Result<String, io::Error> {
-    let mut file = File::open(path)?;
-    let mut contents = String::new();
-    file.read_to_string(&mut contents)?;
-    Ok(contents)
-}
-
-// Avoid
-fn read_file(path: &Path) -> String {
-    std::fs::read_to_string(path).unwrap()
-}
-```
+- Use `anyhow::Result<T>` for application-level errors
+- Define custom error types in `src/web/error.rs`
+- Implement `IntoResponse` for custom errors
 
 ### Patterns to Follow
-- **Early returns**: Use guard clauses to reduce nesting
-- **Small functions**: Prefer single-responsibility functions
-- **Documentation**: Add doc comments (`///`) for public APIs
-- **Ownership**: Prefer borrowing over cloning unless necessary
+- **Module organization**: `src/web/` for HTTP-related code
+- **Handlers**: Keep handlers thin, delegate logic to services
+- **State**: Use `Arc<AppState>` for shared state
+- **Configuration**: Use `clap` for CLI, env vars for runtime config
 
 ### Patterns to Avoid
 - `unwrap()` / `expect()` in production code
 - `panic!()` for control flow
 - Global mutable state
-- Unnecessary boxing (`Box<T>` when not needed)
+- Putting business logic in handlers
 
 ### Testing
-- Add unit tests in the same file using `#[cfg(test)]` module
-- Add integration tests in `tests/` directory
-- Use descriptive test names: `test_descriptive_name()`
-- Follow Arrange-Act-Assert pattern
+- Add unit tests for handlers
+- Use `tower::ServiceExt` for testing routers
+- Mock external dependencies
 
-```rust
-#[cfg(test)]
-mod tests {
-    use super::*;
+## Security Guidelines (ANSSI-inspired)
 
-    #[test]
-    fn test_function_returns_expected_value() {
-        let input = 42;
-        let result = my_function(input);
-        assert_eq!(result, expected);
-    }
-}
-```
+Based on [ANSSI Secure Rust Guidelines](https://anssi-fr.github.io/rust-guide/).
 
-### Git Conventions
+### Unsafe Code
+- **Never use `unsafe` code** unless absolutely necessary for FFI
+- All source files must have `#![forbid(unsafe_code)]` at the top
+- If FFI is required, isolate `unsafe` blocks and document thoroughly
+
+### Memory Safety
+- Never use `std::mem::forget` (causes memory leaks)
+- Use `Box`, `Vec`, and other smart pointers for memory management
+- Avoid manual memory management
+
+### Error Handling
+- Prefer explicit error handling (`Result`) over `panic!`
+- Never use `panic!` for control flow
+- Implement proper error types with `thiserror` or `anyhow`
+
+### Input Validation
+- Always validate user input
+- Use size limits on request bodies
+- Validate JSON payloads before processing
+
+### Dependencies
+- Run `cargo audit` regularly to check for vulnerabilities
+- Run `cargo outdated` to check for outdated dependencies
+- Pin dependency versions when possible
+
+## Git Conventions
 - Use conventional commit messages: `feat:`, `fix:`, `docs:`, `refactor:`, `test:`
 - Run `cargo fmt` and `cargo clippy` before committing
 - Ensure code compiles and passes tests before submitting
-
-## Notes
-- This is a simple project with minimal dependencies
-- No CI/CD configuration exists yet (consider adding GitHub Actions)
-- This project includes `rustfmt.toml` and `clippy.toml` for team consistency
+- Create feature branches for new features (e.g., `feature/http-server`)
