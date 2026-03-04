@@ -5,6 +5,7 @@
 #![forbid(unsafe_code)]
 
 use crate::web::handlers::{echo, health, hello, root};
+use crate::web::tracing::RequestLoggingLayer;
 use axum::{
     extract::DefaultBodyLimit,
     routing::{get, post},
@@ -22,4 +23,5 @@ pub fn create_router() -> Router {
         .route("/api/echo", post(echo))
         .layer(DefaultBodyLimit::max(MAX_PAYLOAD_SIZE))
         .layer(CorsLayer::permissive().max_age(std::time::Duration::from_secs(86400)))
+        .layer(RequestLoggingLayer)
 }
