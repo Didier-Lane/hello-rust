@@ -1,5 +1,7 @@
+docs/
 target/
 .cargo/
+.editorconfig
 .git/
 .gitignore
 Dockerfile

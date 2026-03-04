@@ -1,4 +1,4 @@
-<img src="./docs/ferris.png" alt="Ferris says hello" width="240px" />
+<img src="./docs/ferris.png" alt="Ferris says hello" width="120px" />
 
 # Hello Rust
 
